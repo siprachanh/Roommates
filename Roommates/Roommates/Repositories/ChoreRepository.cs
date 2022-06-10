@@ -26,7 +26,7 @@ namespace Roommates.Repositories
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     // Here we setup the command with the SQL we want to execute before we execute it.
-                    cmd.CommandText = "SELECT Id, Name FROM Room Chore";
+                    cmd.CommandText = "SELECT Id, Name FROM Chore";
 
                     // Execute the SQL in the database and get a "reader" that will give us access to the data.
                     using (SqlDataReader reader = cmd.ExecuteReader())
@@ -121,7 +121,7 @@ namespace Roommates.Repositories
             // when this method is finished we can look in the database and see the new room.
         }
     }
-     }
+}
     
 
 
