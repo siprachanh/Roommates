@@ -35,7 +35,7 @@ namespace Roommates.Repositories
                         List<Chore> chores = new List<Chore>();
 
                         // Read() will return true if there's more data to read. reader.Read()) will advance to the next row. 
-                        
+
                         while (reader.Read())
                         {
                             // The "ordinal" is the numeric position of the column in the query results.
@@ -65,9 +65,10 @@ namespace Roommates.Repositories
                         // Return the list of rooms who whomever called this method.
                         return chores;
                     }
-                    }
                 }
-                }
+            }
+        }
+
         public Chore GetById(int id)
         {
             using (SqlConnection conn = Connection)
@@ -75,8 +76,11 @@ namespace Roommates.Repositories
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = "SELECT Name FROM Chore WHERE Id = @id";
-                    cmd.Parameters.AddWithValue("@id", id);
+                    cmd.CommandText = @"INSERT INTO RoommateChore WHERE Id = @id";
+                    cmd.Parameters.AddWithValue("@rmId", choreId);
+                    cmd.Parameters.AddWithValue("@cId", cId);
+                    cmd.ExecuteNonQuery();
+
 
 
 
@@ -91,7 +95,7 @@ namespace Roommates.Repositories
                             {
                                 Id = id,
                                 Name = reader.GetString(reader.GetOrdinal("Name")),
-                                
+
                             };
                         }
                         return chore;
@@ -100,6 +104,7 @@ namespace Roommates.Repositories
                 }
             }
         }
+
         public void Insert(Chore chore)
         {
             using (SqlConnection conn = Connection)
@@ -117,11 +122,66 @@ namespace Roommates.Repositories
                     chore.Id = id;
                 }
             }
+        
 
-            // when this method is finished we can look in the database and see the new room.
+                    // when this method is finished we can look in the database and see the new room.
+                }
+                public List<Chore> GetUnassignedChores()
+                {
+                    using (SqlConnection conn = Connection)
+                    {
+                        conn.Open();
+
+                        using (SqlCommand cmd = conn.CreateCommand())
+                        {
+                            cmd.CommandText = "SELECT c.Name, c.Id FROM Chore c LEFT JOIN RoommateChore rc on rc.ChoreId = c.Id WHERE rc.Id IS null";
+
+                            using (SqlDataReader reader = cmd.ExecuteReader())
+                            {
+                                List<Chore> unassignedChores = new List<Chore>();
+
+                                while (reader.Read())
+                                {
+                                    int idColumnPosition = reader.GetOrdinal("Id");
+
+                                    int idValue = reader.GetInt32(idColumnPosition);
+
+                                    int nameColumnPosition = reader.GetOrdinal("Name");
+                                    string nameValue = reader.GetString(nameColumnPosition);
+
+                                    Chore chore = new Chore
+                                    {
+                                        Id = idValue,
+                                        Name = nameValue,
+                                    };
+
+                                    unassignedChores.Add(chore);
+                                }
+                                return unassignedChores;
+                            }
+                        }
+                    }
+                }
+
+                public void AssignChore(int rmId, int cId)
+                {
+                    using (SqlConnection conn = Connection)
+                    {
+                        conn.Open();
+                        using (SqlCommand cmd = conn.CreateCommand())
+                        {
+                            cmd.CommandText = @"INSERT INTO RoommateChore (RoommateId, ChoreId)
+                                        VALUES (@rmId, @cId)";
+                            cmd.Parameters.AddWithValue("@rmId", rmId);
+                            cmd.Parameters.AddWithValue("@cId", cId);
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+                }
+            }
         }
-    }
-}
-    
+
+
+
 
 
